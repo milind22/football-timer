@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Football Timestamp Tool</title>
+<style>
+body{
+margin:0;
+background:#0d1117;
+color:white;
+font-family:Arial,sans-serif;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+#clock{
+font-size:min(18vw,240px);
+font-weight:700;
+line-height:1;
+}
+#phase{
+font-size:48px;
+margin:20px 0;
+}
+.row{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+margin:10px;
+}
+button,input{
+font-size:20px;
+padding:10px 16px;
+border:none;
+border-radius:8px;
+}
+input[type=number]{
+width:90px;
+}
+</style>
+</head>
+<body>
+
+<div id="clock">0:00</div>
+<div id="phase">H1</div>
+
+<div class="row">
+<button onclick="shift(-5)">◀ 5s</button>
+<button id="playBtn" onclick="toggle()">▶ Play</button>
+<button onclick="shift(5)">5s ▶</button>
+</div>
+
+<div class="row">
+<button onclick="setPhase('H1')">H1</button>
+<button onclick="setPhase('H2')">H2</button>
+<button onclick="setPhase('ET1')">ET1</button>
+<button onclick="setPhase('ET2')">ET2</button>
+</div>
+
+<div class="row">
+<input type="number" id="minute" min="0" max="150" value="0">
+<span style="font-size:28px">:</span>
+<input type="number" id="second" min="0" max="59" value="0">
+<button onclick="applyTime()">Apply</button>
+</div>
+
+<div class="row">
+<button onclick="fullscreenMode()">Fullscreen</button>
+</div>
+
+<script>
+let totalSeconds = 0;
+let running = false;
+let timer = null;
+let phase = "H1";
+
+function render(){
+ const m = Math.floor(totalSeconds/60);
+ const s = totalSeconds%60;
+
+ document.getElementById("clock").textContent =
+   m + ":" + String(s).padStart(2,"0");
+
+ document.getElementById("phase").textContent = phase;
+}
+
+function toggle(){
+ running = !running;
+
+ document.getElementById("playBtn").textContent =
+   running ? "⏸ Pause" : "▶ Play";
+
+ if(running){
+   timer = setInterval(()=>{
+      totalSeconds++;
+      render();
+   },1000);
+ } else {
+   clearInterval(timer);
+ }
+}
+
+function shift(v){
+ totalSeconds = Math.max(0,totalSeconds+v);
+ render();
+}
+
+function setPhase(p){
+ phase = p;
+ render();
+}
+
+function applyTime(){
+ let m = parseInt(document.getElementById("minute").value) || 0;
+ let s = parseInt(document.getElementById("second").value) || 0;
+
+ if(s > 59) s = 59;
+
+ totalSeconds = m*60 + s;
+ render();
+}
+
+function fullscreenMode(){
+ if(!document.fullscreenElement){
+   document.documentElement.requestFullscreen();
+ } else {
+   document.exitFullscreen();
+ }
+}
+
+document.addEventListener("keydown",e=>{
+ if(e.code==="Space"){
+   e.preventDefault();
+   toggle();
+ }
+ if(e.code==="ArrowLeft") shift(-5);
+ if(e.code==="ArrowRight") shift(5);
+});
+
+render();
+</script>
+
+</body>
+</html>
