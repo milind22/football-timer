@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Football Match Timer</title>
+<style>
+body{font-family:Arial,sans-serif;background:#111;color:#fff;text-align:center;padding:20px}
+#clock{font-size:clamp(64px,12vw,180px);font-weight:bold;margin-top:40px}
+#phase{font-size:clamp(24px,4vw,48px);margin:15px}
+button{font-size:20px;padding:12px 20px;margin:6px}
+input{font-size:20px;padding:10px;width:140px}
+label{font-size:18px}
+</style>
+</head>
+<body>
+<h2>Football Match Timer</h2>
+<div id="clock">00:00</div>
+<div id="phase">1H</div>
+
+<button onclick="shift(-5)">◀ 5s</button>
+<button onclick="toggle()" id="playBtn">▶ Play</button>
+<button onclick="shift(5)">5s ▶</button>
+
+<div style="margin-top:20px">
+<input id="timeInput" placeholder="90:00">
+<button onclick="setTime()">Set Time</button>
+</div>
+
+<div style="margin-top:20px">
+<label><input type="checkbox" id="et"> Extra Time Match</label>
+</div>
+
+<script>
+let seconds=0;
+let running=false;
+let interval=null;
+
+function formatDisplay(s){
+ const et=document.getElementById('et').checked;
+
+ if(!et){
+   if(s>=45*60 && s<46*60){
+      let extra=s-45*60;
+      return `45+${Math.floor(extra/60)}:${String(extra%60).padStart(2,'0')}`;
+   }
+   if(s>=90*60){
+      let extra=s-90*60;
+      return `90+${Math.floor(extra/60)}:${String(extra%60).padStart(2,'0')}`;
+   }
+ }
+
+ if(et){
+   if(s>=45*60 && s<46*60){
+      let extra=s-45*60;
+      return `45+${Math.floor(extra/60)}:${String(extra%60).padStart(2,'0')}`;
+   }
+   if(s>=105*60 && s<106*60){
+      let extra=s-105*60;
+      return `105+${Math.floor(extra/60)}:${String(extra%60).padStart(2,'0')}`;
+   }
+   if(s>=120*60){
+      let extra=s-120*60;
+      return `120+${Math.floor(extra/60)}:${String(extra%60).padStart(2,'0')}`;
+   }
+ }
+
+ const m=Math.floor(s/60);
+ const sec=s%60;
+ return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+function phase(s){
+ const et=document.getElementById('et').checked;
+ if(!et){
+   if(s<45*60) return "1H";
+   if(s<90*60) return "2H";
+   return "2H Stoppage";
+ }
+ if(s<45*60) return "1H";
+ if(s<90*60) return "2H";
+ if(s<105*60) return "ET1";
+ if(s<120*60) return "ET2";
+ return "ET Stoppage";
+}
+
+function render(){
+ document.getElementById('clock').textContent=formatDisplay(seconds);
+ document.getElementById('phase').textContent=phase(seconds);
+}
+
+function toggle(){
+ running=!running;
+ document.getElementById('playBtn').textContent=running?"⏸ Pause":"▶ Play";
+ if(running){
+   interval=setInterval(()=>{seconds++;render();},1000);
+ }else{
+   clearInterval(interval);
+ }
+}
+
+function shift(v){
+ seconds=Math.max(0,seconds+v);
+ render();
+}
+
+function setTime(){
+ const t=document.getElementById('timeInput').value.trim();
+ const p=t.split(":");
+ if(p.length!==2) return;
+ seconds=parseInt(p[0])*60+parseInt(p[1]);
+ render();
+}
+
+document.addEventListener('keydown',e=>{
+ if(e.code==="Space"){e.preventDefault();toggle();}
+ if(e.code==="ArrowLeft") shift(-5);
+ if(e.code==="ArrowRight") shift(5);
+});
+
+render();
+</script>
+</body>
+</html>
